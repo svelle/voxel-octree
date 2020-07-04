@@ -23,9 +23,12 @@ in vec3 rayOrigin;
 
 layout(location = 0) out vec4 f_color;
 
+#define SPEED 0.01
 #define MAX_DIST 1e10
-#define SUN normalize(vec3(cos(frame * 0.001), sin(frame * 0.001), sin(frame * 0.001)))
+#define SUN normalize(vec3(cos(frame * SPEED), sin(frame * SPEED), sin(frame * SPEED)))
 #define BOUNCES 3;
+
+#define MOON normalize(vec3(cos(frame * SPEED), sin(frame * SPEED), sin(frame * SPEED)))
 
 uint baseHash( uvec2 p ) {
     p = 1103515245U*((p >> 1U)^(p.yx));
@@ -86,16 +89,30 @@ float iBox( in vec3 ro, in vec3 rd, in vec2 distBound, inout vec3 normal, in vec
     }
 }
 
+vec3 rtv(int r, int g, int b) {
+    return vec3(r, g, b) / 255.0;
+}
+
 vec3 sky(vec3 rd) {
     float sun_amount = max(dot(rd, SUN), 0.0);
+    float moon_amount = max(dot(rd, MOON), 0.0);
     vec3 sun_color = vec3(0.6 , .4, 0.2);
+    vec3 moon_color = rtv(189, 209, 225);
 
-    vec3  sky = mix(vec3(.75, .73, .71), vec3(.5, .7, .9) , 0.25 + rd.z);
-    sky = sky + sun_color * min(pow(sun_amount, 1500.0) * 5.0, 1.0);
-    sky = sky + sun_color * min(pow(sun_amount, 10.0) * .6, 1.0);
+    vec3  sky_day = mix(vec3(.75, .73, .71), vec3(.5, .7, .9) , 0.25 + rd.z);
+    sky_day += sun_color * min(pow(sun_amount, 1500.0) * 5.0, 1.0);
+    sky_day += sun_color * min(pow(sun_amount, 10.0) * .6, 1.0);
 
-    return clamp(sky + vec3(SUN.z - 1.0) * vec3(0.5 , .75, 1.0), 0.0, 10.0);
-    //return sky;
+    vec3 sky_night = mix(rtv(47, 78, 87), rtv(25, 35, 45), 0.5 + rd.z);
+    sky_night += moon_color * min(pow(moon_amount, 1500.0) * 5.0, 1.0);
+    sky_night += moon_color * min(pow(moon_amount, 2.0) * .6, 1.0) - 0.1;
+
+
+    if (SUN.z > .0) {
+        return clamp(sky_day + vec3(SUN.z - 1.0) * vec3(0.5, .75, 1.0), 0.0, 10.0);
+    } else {
+        return clamp(sky_night + vec3(MOON.z + 1.0) * rtv(28, 36, 54), 0., 10.);
+    }
 }
 
 vec4 hit(in vec3 ro, in vec3 rd, inout vec3 normal) {

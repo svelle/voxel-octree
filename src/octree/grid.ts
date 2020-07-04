@@ -23,7 +23,7 @@ function getChunkID(position: number[]): number[] {
 	];
 }
 
-function getChuckByID(chunkID: number[]): Chunk {
+function getChunkByID(chunkID: number[]): Chunk {
 	return chunks[map3D1D(chunkID)];
 }
 

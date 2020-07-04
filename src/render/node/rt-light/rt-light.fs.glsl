@@ -23,7 +23,7 @@ in vec3 rayOrigin;
 
 layout(location = 0) out vec4 f_color;
 
-#define SPEED 0.01
+#define SPEED 0.001
 #define MAX_DIST 1e10
 #define SUN normalize(vec3(cos(frame * SPEED), sin(frame * SPEED), sin(frame * SPEED)))
 #define BOUNCES 3;
@@ -170,22 +170,22 @@ void main() {
         vec3 rd = vec3(0);
         float seed = (v_texCoord.x + v_texCoord.y * frame) * 1.0;
 
-        
+
         rd = cosWeightedRandomHemisphereDirection(normal, seed);
         //rd = normalize(rand + normal);
-        
+
         ro += rd * result.w;
         int len = int(gl_FragCoord.x * gl_FragCoord.y + frame) % 3 + 1;
-        
+
         int i = 0;
 
         if (d.w == 0.0) {
             while (true) {
-                        
-                        
+
+
                 result = hit(ro , rd, normal);
                 vec4 block = texelFetch(tColors, ivec2(result.x, 0), 0);
-                
+
 
                 if (result.w > 1.0) {
                     albedo *= sky(rd);
@@ -197,25 +197,25 @@ void main() {
                     if (len == ++i) {
 
                         // last try to hit sun
-                        rd = normalize(rand + SUN * 64.0);    
+                        rd = normalize(rand + SUN * 64.0);
                         result = hit(ro, rd, normal);
-                    
+
                         if (result.w > 1.0) {
                             albedo *= block.rgb * sky(rd);
                         } else {
                             albedo *= 0.0;
                         }
-                        
+
                         break;
                     }
 
-                    
+
                     albedo *= block.rgb;
 
                     ro += rd * result.w;
                     rd = cosWeightedRandomHemisphereDirection(normal, seed);
-                    
-                }         
+
+                }
             }
 
         } else {
@@ -223,9 +223,9 @@ void main() {
         }
 
 
-        f_color.rgb = (albedo ) ;
-        //f_color.w = p.w;
-    
+        f_color.rgb = (albedo) ;
+        f_color.w = p.w;
+
 
     }
 }

@@ -12,6 +12,7 @@ export interface TraversalInfo {
 
 
 
+
 export function modify(info: TraversalInfo, p1: number[], p2: number[], value: number) {
     // check merge
     if (
@@ -66,7 +67,6 @@ export function modify(info: TraversalInfo, p1: number[], p2: number[], value: n
                 if (z0) {
                     // const cIndex = childIndex([0, 0, 0]);
                     const cIndex = 0;
-
                     childInfo.node = info.node.children[cIndex];
                     modify(childInfo, [x0[0], y0[0], z0[0]], [x0[1], y0[1], z0[1]], value);
                 }
@@ -133,14 +133,16 @@ export function modify(info: TraversalInfo, p1: number[], p2: number[], value: n
 
         if (childKeys.length === 8) {
             let canMerge = true;
+            let data;
             for (const key of childKeys) {
-                if (info.node.children[key].children || info.node.children[key].data !== info.node.data) {
+                if (info.node.children[key].children || (data = info.node.children[key].data) === info.node.data) {
                     canMerge = false;
                     break;
                 }
             }
 
             if (canMerge) {
+                info.node.data = data;
                 delete info.node.children;
             }
         }
